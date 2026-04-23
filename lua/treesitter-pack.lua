@@ -1,27 +1,45 @@
+--- @class TSPackSpec
+--- @field src string Repository address
+--- @field lang string|string[] Names of the parsers to install
+
+--- @class TSPackOpts
+--- @field force boolean Whether to perform a forced installation
+
 local M = {}
 
 local PARSER_DIR = vim.fs.joinpath(vim.fn.stdpath("data") .. "/site/parser")
 
+--- Prints a log message without breaking fast events
+--- @param msg string
+--- @param level keyof vim.log.levels
+--- @return void
 local function log(msg, level)
   vim.schedule(function()
     vim.notify("[tree-sitter] " .. msg, vim.log.levels[level])
   end)
 end
 
+--- Creates a temporary directory
+--- @return string
 local function new_temp_dir()
   local path = vim.fn.tempname()
   vim.fn.mkdir(path, "p")
   return path
 end
 
+--- Returns the absolute path that `parser_name` would have once installed
+--- @param parser_name string
+--- @return string
 local function make_parser_abspath(parser_name)
   return vim.fs.joinpath(PARSER_DIR .. ("/%s.so"):format(parser_name))
 end
 
---- Compile using tree-sitter
+--- Compiles a parser from `source_dir`, placing the output
+--- in the `parser` runtimepath directory
+--- @param source_dir string Repository path
+--- @param parser_name string Name of the compiled parser
+--- @return void
 local function build(source_dir, parser_name)
-  assert(parser_name, "Specify a language for all installed parsers.")
-
   local parser_path = make_parser_abspath(parser_name)
   local on_exit = function(status)
     if status.code ~= 0 then
@@ -33,10 +51,13 @@ local function build(source_dir, parser_name)
   vim.system({ "tree-sitter", "build", "--output", parser_path }, { cwd = vim.fs.normalize(source_dir) }, on_exit)
 end
 
+--- Returns all raw parser names
+--- @param source string Where to look for parsers
+--- @return string[]
 local function get_installed_binaries(source)
   local source_path = source or M.install_path
 
-  return vim.fs.find(function(name, path)
+  return vim.fs.find(function(name, _)
     return name:match(".*%.so$")
   end, {
     path = source_path,
@@ -45,12 +66,18 @@ local function get_installed_binaries(source)
   })
 end
 
---- Download and compile a parser
+--- Download a project and compile its parsers
+--- @param src string Repository address
+--- @param targets string[] Names of the languages to install
+--- @return vim.SystemObj
 local function install(src, targets)
   assert(type(src) == "string", "Use a valid repository address.")
   assert(type(targets) == "table" and #targets > 0, "Specify the languages defined by this parser.")
 
   local dest = new_temp_dir()
+
+  --- @param status vim.SystemCompleted
+  --- @return vim.SystemObj?
   local on_exit = function(status)
     local repo_name = src:match("^.*%/(.+)$")
 
@@ -76,14 +103,21 @@ local function install(src, targets)
     end
   end
 
-  vim.fn.mkdir(PARSER_DIR, "p")
+  vim.fn.mkdir(PARSER_DIR, "p")   -- Create parser directory if doesn't exist
   return vim.system({ "git", "clone", "--depth", "1", src, dest }, {}, on_exit)
 end
 
+--- Returns parser name from its path
+--- @param path string Parser path
+--- @return string
 local function get_parser_name(path)
   return (vim.fs.basename(path):gsub("%.so$", ""))
 end
 
+--- Add parsers to Neovim
+--- @param spec TSPackSpec
+--- @param opts TSPackOpts
+--- @return void
 function M.add(spec, opts)
   assert(type(spec) == "table", "Must specify a table as spec.")
   assert(not opts or type(opts) == "table", "Must specify a table as opts.")
@@ -108,11 +142,16 @@ function M.add(spec, opts)
   end
 end
 
+--- Retrieve installed parser names
+--- @return string[]
 function M.get()
   local parsers = get_installed_binaries(PARSER_DIR)
   return vim.iter(parsers):map(get_parser_name):totable()
 end
 
+--- Remove parsers from Neovim, deleting their binaries from runtimepath
+--- @param names string[] Parsers to erase
+--- @return void
 function M.del(names)
   for _, name in ipairs(names) do
     local path = make_parser_abspath(name)
