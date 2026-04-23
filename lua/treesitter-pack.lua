@@ -1,7 +1,6 @@
 local M = {}
 
-M.install_dir = vim.fs.joinpath(vim.fn.stdpath("data") .. "/site/parser")
-vim.fn.mkdir(M.install_dir, "p")
+local PARSER_DIR = vim.fs.joinpath(vim.fn.stdpath("data") .. "/site/parser")
 
 local function log(msg, level)
   vim.schedule(function()
@@ -16,7 +15,7 @@ local function new_temp_dir()
 end
 
 local function make_parser_abspath(parser_name)
-  return vim.fs.joinpath(M.install_dir .. ("/%s.so"):format(parser_name))
+  return vim.fs.joinpath(PARSER_DIR .. ("/%s.so"):format(parser_name))
 end
 
 --- Compile using tree-sitter
@@ -77,6 +76,7 @@ local function install(src, targets)
     end
   end
 
+  vim.fn.mkdir(PARSER_DIR, "p")
   return vim.system({ "git", "clone", "--depth", "1", src, dest }, {}, on_exit)
 end
 
@@ -109,7 +109,7 @@ function M.add(spec, opts)
 end
 
 function M.get()
-  local parsers = get_installed_binaries(M.install_dir)
+  local parsers = get_installed_binaries(PARSER_DIR)
   return vim.iter(parsers):map(get_parser_name):totable()
 end
 
