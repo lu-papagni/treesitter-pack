@@ -1,0 +1,52 @@
+==============================================================================
+Spec definition                                           *treesitter-pack.spec*
+
+TSPackSpec                                                          *TSPackSpec*
+
+    Fields: ~
+        {src}   (string)           Repository address
+        {lang}  (string|string[])  Names of the parsers to install
+
+
+TSPackOpts                                                          *TSPackOpts*
+
+    Fields: ~
+        {force}  (boolean)  Whether to perform a forced installation
+
+
+==============================================================================
+API Overview                                               *treesitter-pack.api*
+
+M.add({spec}, {opts})                                                    *M.add*
+    Add parsers to Neovim
+
+    Parameters: ~
+        {spec}  (TSPackSpec)
+        {opts}  (TSPackOpts)
+
+    Returns: ~
+        (void)
+
+    See: ~
+        |TSPackSpec|
+        |TSPackOpts|
+
+
+M.get()                                                                  *M.get*
+    Retrieve installed parser names
+
+    Returns: ~
+        (string[])
+
+
+M.del({names})                                                           *M.del*
+    Remove parsers from Neovim, deleting their binaries from runtimepath
+
+    Parameters: ~
+        {names}  (string[])  Parsers to erase
+
+    Returns: ~
+        (void)
+
+
+vim:tw=78:ts=8:noet:ft=help:norl:
