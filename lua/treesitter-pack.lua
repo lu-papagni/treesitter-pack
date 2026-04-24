@@ -119,8 +119,17 @@ end
 ---@mod treesitter-pack.api API Overview
 
 ---Add parsers to Neovim
----@param spec TSPackSpec
----@param opts TSPackOpts
+---@param spec TSPackSpec List of parsers marked for installation:
+---* {src} The address is passed as-is to 'git'.
+---  This allows to use a shorter source, like
+---  in |vim.pack-examples|.
+---
+---* {lang} When more than one parser name
+---  is given, the repo is expected to contain
+---  one sub-directory for each name.
+---  These will be considered the new build targets
+---  instead of the repo root.
+---@param opts? TSPackOpts Other installation settings
 ---@return void
 ---@see TSPackSpec
 ---@see TSPackOpts
