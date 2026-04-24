@@ -64,7 +64,9 @@ require("treesitter-pack").add({
     },
     {
         src = "https://github.com/tree-sitter/tree-sitter-c",
-        lang = "c"
+        -- You can omit the 'lang' attribute
+        -- Its value will be inferred using the last word from the repo name
+        -- lang = "c"
     },
 })
 ```
