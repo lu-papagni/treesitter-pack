@@ -4,8 +4,8 @@ Spec definition                                           *treesitter-pack.spec*
 TSPackSpec                                                          *TSPackSpec*
 
     Fields: ~
-        {src}   (string)           Repository address
-        {lang}  (string|string[])  Names of the parsers to install
+        {src}    (string)           Repository address
+        {lang?}  (string|string[])  Names of the parsers to install
 
 
 TSPackOpts                                                          *TSPackOpts*
@@ -31,6 +31,8 @@ M.add({spec}, {opts?})                                                   *M.add*
                                  one sub-directory for each name.
                                  These will be considered the new build targets
                                  instead of the repo root.
+                                 If omitted, it is inferred from the repository
+                                 name by taking the last segment separated by '-'.
         {opts?}  (TSPackOpts)  Other installation settings
 
     Returns: ~

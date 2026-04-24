@@ -2,7 +2,7 @@
 
 ---@class TSPackSpec
 ---@field src string Repository address
----@field lang string|string[] Names of the parsers to install
+---@field lang? string|string[] Names of the parsers to install
 
 ---@class TSPackOpts
 ---@field force boolean Whether to perform a forced installation
@@ -116,6 +116,19 @@ local function get_parser_name(path)
   return (vim.fs.basename(path):gsub("%.so$", ""))
 end
 
+---Infers parser name from repository source string
+---@param src string Repository address
+---@return string?
+local function guess_lang(src)
+  local repo_name = src:gsub("/+$", ""):match("([^/]+)$")
+  if not repo_name then
+    return nil
+  end
+
+  repo_name = repo_name:gsub("%.git$", "")
+  return repo_name:match("([^-]+)$")
+end
+
 ---@mod treesitter-pack.api API Overview
 
 ---Add parsers to Neovim
@@ -129,6 +142,8 @@ end
 ---  one sub-directory for each name.
 ---  These will be considered the new build targets
 ---  instead of the repo root.
+---  If omitted, it is inferred from the repository
+---  name by taking the last segment separated by '-'.
 ---@param opts? TSPackOpts Other installation settings
 ---@return void
 ---@see TSPackSpec
@@ -142,8 +157,11 @@ function M.add(spec, opts)
   vim.list_extend(parsers, spec)
 
   for _, parser in ipairs(parsers) do
+    local langs = parser.lang or guess_lang(parser.src)
+    assert(langs, "Could not infer parser language from repository: " .. parser.src)
+
     local targets = vim
-      .iter({ parser.lang })
+      .iter({ langs })
       :flatten()
       :filter(function(l)
         local path = make_parser_abspath(l)
