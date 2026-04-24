@@ -75,8 +75,10 @@ require("treesitter-pack").add({
 
 ```lua
 require("treesitter-pack").add({
-    src = "https://github.com/tree-sitter/tree-sitter-rust",
-    lang = "rust"
+    {
+        src = "https://github.com/tree-sitter/tree-sitter-rust",
+        lang = "rust"
+    }
 }, { force = true })
 ```
 
@@ -94,8 +96,10 @@ You can install all of them (or a subset) by passing many `lang` values.
 
 ```lua
 require("treesitter-pack").add({
-    src = "https://github.com/tree-sitter/tree-sitter-typescript",
-    lang = { "typescript", "tsx" }
+    {
+        src = "https://github.com/tree-sitter/tree-sitter-typescript",
+        lang = { "typescript", "tsx" }
+    }
 })
 ```
 
