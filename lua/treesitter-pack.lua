@@ -17,7 +17,7 @@ local PARSER_DIR = vim.fs.joinpath(vim.fn.stdpath("data") .. "/site/parser")
 ---@return void
 local function log(msg, level)
   vim.schedule(function()
-    vim.notify("[tree-sitter] " .. msg, vim.log.levels[level])
+    vim.notify("[treesitter-pack] " .. msg, vim.log.levels[level])
   end)
 end
 
@@ -47,7 +47,7 @@ local function build(source_dir, parser_name)
     if status.code ~= 0 then
       log("Error during build: " .. status.stderr, "WARN")
     else
-      log("Parser " .. parser_name .. " installed.", "INFO")
+      log("Parser installed: " .. parser_name, "INFO")
     end
   end
   vim.system({ "tree-sitter", "build", "--output", parser_path }, { cwd = vim.fs.normalize(source_dir) }, on_exit)
@@ -88,7 +88,7 @@ local function install(src, targets)
       return
     end
 
-    log("Checked out " .. repo_name, "INFO")
+    log("Downloaded " .. repo_name, "INFO")
 
     if #targets == 1 then
       local dialect_path = vim.fs.joinpath(dest .. "/" .. targets[1])
