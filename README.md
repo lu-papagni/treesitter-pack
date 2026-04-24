@@ -79,3 +79,23 @@ require("treesitter-pack").add({
     lang = "rust"
 }, { force = true })
 ```
+
+**Handling repos with more than one parser**
+
+Some parser repositories like [tree-sitter-typescript](https://github.com/tree-sitter/tree-sitter-typescript)
+define multiple parsers, in this case `typescript` and `tsx`.
+
+> [!WARNING]
+> In cases like this you **can't** omit `lang`.
+> If you do, then the plugin will assume that the repository root is a valid
+> build target.
+
+You can install all of them (or a subset) by passing many `lang` values.
+
+```lua
+require("treesitter-pack").add({
+    src = "https://github.com/tree-sitter/tree-sitter-typescript",
+    lang = { "typescript", "tsx" }
+})
+```
+
