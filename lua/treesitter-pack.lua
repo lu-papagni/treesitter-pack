@@ -103,7 +103,7 @@ local function install(src, targets)
     end
   end
 
-  vim.fn.mkdir(PARSER_DIR, "p")   -- Create parser directory if doesn't exist
+  vim.fn.mkdir(PARSER_DIR, "p") -- Create parser directory if doesn't exist
   return vim.system({ "git", "clone", "--depth", "1", src, dest }, {}, on_exit)
 end
 
