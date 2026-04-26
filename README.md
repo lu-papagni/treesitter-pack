@@ -82,6 +82,20 @@ require("treesitter-pack").add({
 }, { force = true })
 ```
 
+**Running parser generation before build**
+
+Parser generation is disabled by default. Enable it explicitly when needed:
+
+```lua
+require("treesitter-pack").add({
+    { src = "https://github.com/tree-sitter-perl/tree-sitter-perl" }
+}, { generate = true })
+```
+
+> [!TIP]
+> Generating the parser is not required when the `src/parser.c` file is provided
+> by the parser author.
+
 **Handling repos with more than one parser**
 
 Some parser repositories like [tree-sitter-typescript](https://github.com/tree-sitter/tree-sitter-typescript)
@@ -102,4 +116,3 @@ require("treesitter-pack").add({
     }
 })
 ```
-
