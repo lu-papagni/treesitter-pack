@@ -99,12 +99,7 @@ require("treesitter-pack").add({
 **Handling repos with more than one parser**
 
 Some parser repositories like [tree-sitter-typescript](https://github.com/tree-sitter/tree-sitter-typescript)
-define multiple parsers, in this case `typescript` and `tsx`.
-
-> [!WARNING]
-> In cases like this you **can't** omit `lang`.
-> If you do, then the plugin will assume that the repository root is a valid
-> build target.
+define multiple parsers, in this case `typescript` and `tsx`, stored in their respective sub-directories.
 
 You can install all of them (or a subset) by passing many `lang` values.
 
@@ -116,3 +111,10 @@ require("treesitter-pack").add({
     }
 })
 ```
+
+> [!WARNING]
+> In this case, if you omit `lang` and its inferred value does not match any sub-directory,
+> then the plugin will fallback to the repository root as build target.
+>
+> This would result in a **build failure**.
+
