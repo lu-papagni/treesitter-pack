@@ -5,7 +5,8 @@
 ---@field lang? string|string[] Names of the parsers to install
 
 ---@class TSPackOpts
----@field force boolean Whether to perform a forced installation
+---@field force? boolean Perform a forced installation
+---@field generate? boolean Generate parser source before building
 
 local M = {}
 
@@ -40,8 +41,9 @@ end
 ---in the `parser` runtimepath directory
 ---@param source_dir string Repository path
 ---@param parser_name string Name of the compiled parser
+---@param should_generate boolean? Whether to run parser generation first
 ---@return void
-local function build(source_dir, parser_name)
+local function build(source_dir, parser_name, should_generate)
   local parser_path = make_parser_abspath(parser_name)
   local cwd = vim.fs.normalize(source_dir)
 
@@ -53,11 +55,20 @@ local function build(source_dir, parser_name)
     end
   end
 
+  local start_build = function()
+    vim.system({ "tree-sitter", "build", "--output", parser_path }, { cwd = cwd }, on_build_exit)
+  end
+
+  if not should_generate then
+    start_build()
+    return
+  end
+
   local on_generate_exit = function(status)
     if status.code ~= 0 then
       log("Error during generate: " .. status.stderr, "WARN")
     end
-    vim.system({ "tree-sitter", "build", "--output", parser_path }, { cwd = cwd }, on_build_exit)
+    start_build()
   end
 
   vim.system({ "tree-sitter", "generate" }, { cwd = cwd }, on_generate_exit)
@@ -81,8 +92,9 @@ end
 ---Download a project and compile its parsers
 ---@param src string Repository address
 ---@param targets string[] Names of the languages to install
+---@param opts TSPackOpts Other installation settings
 ---@return vim.SystemObj
-local function install(src, targets)
+local function install(src, targets, opts)
   assert(type(src) == "string", "Use a valid repository address.")
   assert(type(targets) == "table" and #targets > 0, "Specify the languages defined by this parser.")
 
@@ -103,7 +115,7 @@ local function install(src, targets)
     if #targets == 1 then
       local dialect_path = vim.fs.joinpath(dest .. "/" .. targets[1])
       if not vim.uv.fs_stat(dialect_path) then
-        build(dest, targets[1])
+        build(dest, targets[1], opts.generate)
         return
       end
     end
@@ -111,7 +123,7 @@ local function install(src, targets)
     -- to compile for a single repo
     for _, lang in ipairs(targets) do
       local path = vim.fs.joinpath(dest .. "/" .. lang)
-      build(path, lang)
+      build(path, lang, opts.generate)
     end
   end
 
@@ -180,7 +192,7 @@ function M.add(spec, opts)
       :totable()
 
     if #targets > 0 then
-      install(parser.src, targets)
+      install(parser.src, targets, opts)
     end
   end
 end

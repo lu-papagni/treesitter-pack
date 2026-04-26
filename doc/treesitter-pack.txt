@@ -11,7 +11,8 @@ TSPackSpec                                                          *TSPackSpec*
 TSPackOpts                                                          *TSPackOpts*
 
     Fields: ~
-        {force}  (boolean)  Whether to perform a forced installation
+        {force?}     (boolean)  Perform a forced installation
+        {generate?}  (boolean)  Generate parser source before building
 
 
 ==============================================================================
