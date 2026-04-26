@@ -43,14 +43,24 @@ end
 ---@return void
 local function build(source_dir, parser_name)
   local parser_path = make_parser_abspath(parser_name)
-  local on_exit = function(status)
+  local cwd = vim.fs.normalize(source_dir)
+
+  local on_build_exit = function(status)
     if status.code ~= 0 then
       log("Error during build: " .. status.stderr, "WARN")
     else
       log("Parser installed: " .. parser_name, "INFO")
     end
   end
-  vim.system({ "tree-sitter", "build", "--output", parser_path }, { cwd = vim.fs.normalize(source_dir) }, on_exit)
+
+  local on_generate_exit = function(status)
+    if status.code ~= 0 then
+      log("Error during generate: " .. status.stderr, "WARN")
+    end
+    vim.system({ "tree-sitter", "build", "--output", parser_path }, { cwd = cwd }, on_build_exit)
+  end
+
+  vim.system({ "tree-sitter", "generate" }, { cwd = cwd }, on_generate_exit)
 end
 
 ---Returns all raw parser names
